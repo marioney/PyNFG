@@ -9,7 +9,8 @@ import numpy as np
 #######################################################
 
 probs = np.ones(6)/float(6)
-strats = np.arange(10,70,10)
+strats = np.arange(10, 70, 10)
+
 
 def EU_H(Q, probsopp =probs):
     eus = []
@@ -18,6 +19,7 @@ def EU_H(Q, probsopp =probs):
         eus.append(np.sum(u))
     return np.asarray(eus)
 
+
 def EU_L(Q, probsopp =probs):
     eus = []
     for i in Q:
@@ -25,13 +27,16 @@ def EU_L(Q, probsopp =probs):
         eus.append(np.sum(u))
     return np.asarray(eus)
 
+
 def lqre(eus, beta):
     denom = np.sum(np.exp(beta*eus))
     num = np.exp(beta*eus)
     return num/denom
 
-alpha = .8 #high_given_high
-gamma = .3 #high_given_low
+
+alpha = .8  #high_given_high
+gamma = .3  #high_given_low
+
 
 def phigh(signal):
     if signal =='h':
@@ -45,6 +50,7 @@ def plow(signal):
         return gamma*.5/(gamma*.5 + alpha*.5)
     if signal =='l':
         return .5 *(1-gamma) / (.5*(1-gamma) + .5*(1-alpha))
+
 
 def treylk(signal, mikeshigh=probs, mikeslow=probs,
            beta=.01, returnEU=False):
@@ -60,6 +66,7 @@ def treylk(signal, mikeshigh=probs, mikeslow=probs,
         if returnEU:
             return EU
         return lqre(EU, beta)
+
 
 def mikelk(signal, treyhigh = probs, treylow = probs,
            beta=.01, returnEU=False):
@@ -77,6 +84,7 @@ def mikelk(signal, treyhigh = probs, treylow = probs,
         if returnEU:
             return EU
         return lqre(EU, beta)
+
 
 def genCPT(Lmike=3, Ltrey=3):
     mikelkh = np.copy(probs)
@@ -115,17 +123,20 @@ mikes_signal = pynfg.ChanceNode('mikes_signal',
 mike = pynfg.DecisionNode('mike', 'mike', list(np.arange(10,70,10)),
                           parents = [mikes_signal])
 
+
 def umike(market, trey, mike):
-    if market =='h':
+    if market == 'h':
         return mike*(200-2*(mike+trey)) - mike
-    if market =='l':
-        return mike * (90-(mike+trey)) -mike
+    if market == 'l':
+        return mike * (90-(mike+trey)) - mike
+
 
 def utrey(market, trey, mike):
-    if market =='h':
+    if market == 'h':
         return trey*(200-2*(mike+trey)) - trey
-    if market =='l':
-        return trey * (90-(mike+trey)) -trey
+    if market == 'l':
+        return trey * (90-(mike+trey)) - trey
+
 utils = {'mike': umike, 'trey': utrey}
 
 Game =pynfg.SemiNFG(set([market, trey, mikes_signal, mike]), utils)
@@ -141,7 +152,10 @@ brgame.train_node('trey', 1, logit=True)
 brgame.train_node('mike', 1, logit=True)
 brgame.train_node('trey', 2, logit=True)
 brgame.train_node('mike', 2, logit=True)
+
+
 from numpy.testing import assert_almost_equal
+
 assert_almost_equal(brgame.Game.node_dict['trey'].LevelCPT[2],
                     CPTs['trey'], decimal=2)
 assert_almost_equal(brgame.Game.node_dict['mike'].LevelCPT[2],

@@ -16,9 +16,11 @@ from __future__ import division
 import numpy as np
 import scipy as sp
 import networkx as nx
+from networkx.drawing.nx_agraph import graphviz_layout
 import inspect
 import matplotlib.pyplot as plt
 from pynfg import DecisionNode, DeterNode, ChanceNode
+
 
 class SemiNFG(object):
     """Implements the semi-NFG formalism created by D. Wolpert
@@ -483,8 +485,12 @@ class SemiNFG(object):
         for n in nodeset:
             for child in nodeset.intersection(self.edges[n.name]):
                 G.add_edge(n.name,child.name)
-        pos = nx.spring_layout(G, iterations=100)
- #       nx.draw_networkx(G, pos)
-        fig = nx.draw_graphviz(G, prog='dot')
+#        pos = nx.spring_layout(G, iterations=100)
+#        fig = nx.draw_networkx(G, pos)
+        #fig = nx.draw(G, pos=graphviz_layout(G), node_size=1600, cmap=plt.cm.Blues,
+         #             node_color=range(len(G)), prog='dot')
+#        fig = nx.draw_graphviz(G, prog='dot')
+        fig = nx.draw(G, pos=graphviz_layout(G), node_size=1600, cmap=plt.cm.Blues,
+                      node_color=range(len(G)), prog='dot')
         plt.show()
         return fig

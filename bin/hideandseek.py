@@ -225,7 +225,6 @@ valuedict = G.get_values(nodenames=['Cseek0', 'Dhide8'])
 #####################################################
 from pynfg.levelksolutions.mcrl import *
 
-<<<<<<< HEAD
 N=10
 GG = copy.deepcopy(G) #NOTE: setting uni=True below starts Dseek as uniform
 #Train Seeker against L0 Hider
@@ -241,20 +240,20 @@ GhideL1, returnfig = mcrl_ewma(GG, 'Dhide', np.linspace(50,1,N), N, \
 G1 = copy.deepcopy(GhideL1)
 for n in GhideL1.bn_part['Dseek']:
     n.CPT = GseekL1.bn_part['Dseek'][0].CPT
-=======
-# Generate the dictionary of inputs
-N = 10
-mcrl_params = mcrl_dict(G, 1, np.linspace(50,1,N), N, 1, np.linspace(.5,1,N), np.linspace(.2,1,N),  L0Dist = 'uniform', pureout=True)
-
-MCRL_solved = EWMA_MCRL(G, mcrl_params)
-MCRL_solved.solve_game(setCPT=True)
-# Show convergence for hider
-
-MCRL_solved.figs['Dhide']['1'].show()
-# We can also train a player to the next level
-
-MCRL_solved.train_node('Dhide', 2, setCPT=False)
->>>>>>> rlk
+# =======
+# # Generate the dictionary of inputs
+# N = 10
+# mcrl_params = mcrl_dict(G, 1, np.linspace(50,1,N), N, 1, np.linspace(.5,1,N), np.linspace(.2,1,N),  L0Dist = 'uniform', pureout=True)
+#
+# MCRL_solved = EWMA_MCRL(G, mcrl_params)
+# MCRL_solved.solve_game(setCPT=True)
+# # Show convergence for hider
+#
+# MCRL_solved.figs['Dhide']['1'].show()
+# # We can also train a player to the next level
+#
+# MCRL_solved.train_node('Dhide', 2, setCPT=False)
+# >>>>>>> rlk
 
 
 # Use the game attribute of MCRL_solved with appropriate CPTs to perform PGT
@@ -279,11 +278,9 @@ def density(iq):
     return z
 
 GG = copy.deepcopy(G1) #NOTE: the CPTs of G are seeds for MH and MC sampling
-<<<<<<< HEAD
+
 S = 30 #number of samples
-=======
-S = 20 #number of samples
->>>>>>> rlk
+
 X = 10 #number of samples of utility of G in calculating iq
 M = 20 #number of alternative strategies sampled in calculating iq
 noise = .2 #noise in the perturbations of G for MH or MC sampling

@@ -16,6 +16,7 @@ import numpy as np
 import copy
 import pynfg
 
+
 def mceu(Game, dn, N, tol=30, delta=1, verbose=False):
     """Compute the move-conditioned expected utilities for all parent values
 
@@ -34,6 +35,7 @@ def mceu(Game, dn, N, tol=30, delta=1, verbose=False):
     else:
         return _mceu_iterated(Game, dn, N, tol, delta,  verbose)
 
+
 def _mceu_iterated(Game, dn, N, tol=30, delta=1, verbose=False):
     G = copy.deepcopy(Game)
     player = G.node_dict[dn].player
@@ -47,7 +49,12 @@ def _mceu_iterated(Game, dn, N, tol=30, delta=1, verbose=False):
     try:
         ufoo = G.npv_reward
         uargs = [player, G.node_dict[dn].time, delta]
-    while  np.min(visits)<tol or n>N:
+    except AttributeError:
+        ufoo = G.utility
+        uargs = player
+        print "Oops!  That was no valid number.  Try again..."
+
+    while np.min(visits)<tol or n>N:
         n += 1
         G.sample()
         idx = G.node_dict[dn].get_CPTindex()
@@ -68,7 +75,9 @@ def _mceu_iterated(Game, dn, N, tol=30, delta=1, verbose=False):
     visits[idx] = 1
     return Utable/np.float_(visits)
 
+
 def _mceu_static(Game, dn, N, tol, verbose=False):
+    G = copy.deepcopy(Game)
     player = G.node_dict[dn].player
     CPT_shape = G.node_dict[dn].CPT.shape
     childnames = [node.name for node in G.children(dn)]
@@ -121,6 +130,7 @@ def convert_2_pureCPT(anarray):
     newCPT = newarray/np.sum(newarray, axis=-1)[...,np.newaxis]
     return newCPT
 
+
 def mh_decision(pnew, pold, qnew=1, qold=1):
     """Decide to accept the new draw or keep the old one
 
@@ -149,6 +159,7 @@ def mh_decision(pnew, pold, qnew=1, qold=1):
         verdict = False
     return verdict
 
+
 def input_dict(G, player_spec, node_spec):
     solver_input = {}
     player_keys = [key[0] for key in player_spec]
@@ -158,6 +169,7 @@ def input_dict(G, player_spec, node_spec):
         for node in G.partition[player]:
             solver_input[player][node.name] = dict(node_spec)
     return solver_input
+
 
 def iterated_input_dict(G, player_spec, bn_spec):
     solver_input = {}
