@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # -*- coding: utf-8 -*-
 """
 Implements a simple hide-and-seek iterSemiNFG:
@@ -23,8 +25,8 @@ GNU Affero General Public License
 """
 from __future__ import division
 
-from pynfg import DecisionNode, DeterNode, ChanceNode
-from pynfg import SemiNFG, iterSemiNFG
+from pynfg_ros import DecisionNode, DeterNode, ChanceNode
+from pynfg_ros import SemiNFG, iterSemiNFG
 import numpy as np
 import scipy.stats.distributions as randvars
 import time
@@ -223,7 +225,7 @@ valuedict = G.get_values(nodenames=['Cseek0', 'Dhide8'])
 #####################################################
 ##TRAINING LEVEL 1 with ewma_mcrl
 #####################################################
-from pynfg.levelksolutions.mcrl import *
+from pynfg_ros.levelksolutions.mcrl import *
 
 N=10
 GG = copy.deepcopy(G) #NOTE: setting uni=True below starts Dseek as uniform
@@ -287,7 +289,7 @@ noise = .2 #noise in the perturbations of G for MH or MC sampling
 innoise = noise #satisficing distribution noise for iq calculations
 burn = 10 #number of draws to burn for MH
 
-from pynfg.pgtsolutions.intelligence.policy import *
+from pynfg_ros.pgtsolutions.intelligence.policy import *
 
 tipoff = time.time() #starting a timer
 #Importance Samping estimation of PGT posterior
@@ -298,7 +300,7 @@ intelMC, funcoutMC, weightMC = policy_MC(GG, S, noise, X, M, \
                                         mix=False, \
                                         satisfice=GG)
 halftime = time.time()
-print halftime-tipoff
+print (halftime-tipoff)
 #Metropolis-Hastings estimation of PGT posterior
 intelMH, funcoutMH, densMH = policy_MH(GG, S, density, noise, X, M, \
                                        innoise=.2, \
@@ -306,12 +308,12 @@ intelMH, funcoutMH, densMH = policy_MH(GG, S, density, noise, X, M, \
                                        integrand=captures, \
                                        mix=False, \
                                        satisfice=GG)
-buzzer = time.time()
+buzzer = time.time()  # type: float
 #Printing elapsed times
 T = halftime-tipoff
-print 'MC took:', T,  'sec., ', T/60, 'min., or', T/3600, 'hr.'
+print ('MC took:', T,  'sec., ', T/60, 'min., or', T/3600, 'hr.')
 T = buzzer-halftime
-print 'MH took:', T,  'sec., ', T/60, 'min., or', T/3600, 'hr.'
+print ('MH took:', T,  'sec., ', T/60, 'min., or', T/3600, 'hr.')
 
 ###########################################
 ##PLOTTING PGT RESULTS
