@@ -10,13 +10,14 @@ GNU Affero General Public License
 
 from collections import OrderedDict
 
+
 class Node(object):
-    """Implements a generic node of the semi-NFG formalism created by D. Wolpert
+    """
+    Implements a generic node of the semi-NFG formalism created by D. Wolpert
 
-    .. note::
-
-       This is the superclass. Nodes are generally instantiated in one of the
-       subclasses, ChanceNode, DecisionNode or DeterNode.
+    note::
+           This is the superclass. Nodes are generally instantiated in one of the
+           subclasses, ChanceNode, DecisionNode or DeterNode.
 
     :arg name: the name of the Node, usually descriptive, e.g. C5 for
        the fifth chance node (C for chance), or C21 for the second chance node
@@ -24,12 +25,11 @@ class Node(object):
     :type name: str
     :arg parents: a list of the Node's parents
     :type parents: list
-    :arg continuous: True if Node takes on continuous values. False if
-       discrete.
+    :arg continuous: True if Node takes on continuous values. False if discrete.
     :type continuous: bool
 
     Upon initialization, the following private method is called:
-    :py:meth:`nodes.DeterNode._set_parent_dict()`
+        :py:meth:`nodes.DeterNode._set_parent_dict()`
 
     Some useful methods are:
 
@@ -41,9 +41,13 @@ class Node(object):
         self.name = name
         self.parents = self._set_parent_dict(parents)
         self.continuous = continuous
+        self.value = None  # value of the Node object, to be assigned later
+        self.valueindex = None  # value index of the Node object, to be assigned later
 
-    def _set_parent_dict(self, parents):
-        """Set the parent OrderedDict based on the params entered by user
+    @staticmethod
+    def _set_parent_dict(parents):
+        """
+        Set the parent OrderedDict based on the params entered by user
 
         :arg parents: list of parameter values for the Node. For ChanceNode and
            DecisionNode objects, this is just a list of parent nodes. For
@@ -60,19 +64,17 @@ class Node(object):
         return r
 
     def _check_disc_parents(self):
-        """Check that parents entered by user are discrete
-
-        :arg parent: a dictionary with keys as parent names and values as parent
-           nodes
-        :type parent: dict
+        """
+        Check that parents, (self.parents) entered by user are discrete
 
         """
         for par in self.parents.values():
             if par.continuous is True:
-                raise RuntimeError("The parent named %s is continuous!" %par.name)
+                raise RuntimeError("The parent named %s is continuous!" % par.name)
 
     def dict2list_vals(self, parentinput=None, valueinput=None):
-        """Convert parent/value dict entered by user to a list of values
+        """
+        Convert parent/value dict entered by user to a list of values
 
         :arg parentinput: Optional. Specify values of the parents. Keys are
            parent names. Values are parent values. To specify values for only a
@@ -101,7 +103,8 @@ class Node(object):
         return valuelist
 
     def get_CPTindex(self, parentinput=None, valueinput=None):
-        """Get the CPT index of (parent[, node]) values from user-supplied dict
+        """
+        Get the CPT index of (parent[, node]) values from user-supplied dict
 
         :arg parentinput: Optional. Specify values of the parents. If input is
            dict, keys are parent names. Values are parent values. To specify
@@ -120,14 +123,13 @@ class Node(object):
 
         """
         if self.continuous:
-            raise AttributeError('cont. nodes do not have CPTs')
+            raise AttributeError('Continuous nodes do not have CPTs')
         ind = []
         if parentinput is None:
             parentinput = {}
         if isinstance(parentinput, list):
-            if len(parentinput)<len(self.parents.keys()):
-                raise ValueError('parentinput as list must have at least as', \
-                                 'many entries as the parent dict')
+            if len(parentinput) < len(self.parents.keys()):
+                raise ValueError('parentinput as list must have at least as many entries as the parent dict')
             else:
                 i = 0
                 for par in self.parents.values():
@@ -147,7 +149,8 @@ class Node(object):
         return indo
 
     def set_value(self, value):
-        """Set the current value of the Node object
+        """
+        Set the current value of the Node object
 
         :arg value: a legitimate value of the Node object, i.e. the
            value must be in :py:attr:`classes.Node.space`.
@@ -165,37 +168,40 @@ class Node(object):
         self.value = value
 
     def set_valueindex(self, index):
-        """Set the valueindex attribute of the discrete Node object
+        """
+        Set the valueindex attribute of the discrete Node object
 
         :arg index: the index for the current value
         :type index: int
 
         """
         if self.continuous:
-            raise AttributeError('continuous nodes don\'t have valueindex'+
-                                ' attribute')
-        elif index>=0 and index<len(self.space):
+            raise AttributeError('continuous nodes do not have valueindex' +
+                                 ' attribute')
+        elif 0 <= index < len(self.space):
             self.valueindex = index
             self.value = self.space[self.valueindex]
         else:
             raise ValueError('the index exceeds the size of the space')
 
     def get_value(self, index=None):
-        """Get the current value of the Node object
+        """
+        Get the current value of the Node object
 
         """
         if self.continuous:
-#            try:
+            #            try:
             return self.value
-#            except AttributeError:
-#                print self.name
+            #            except AttributeError:
+            #            print self.name
         elif index:
             return self.space[index]
         else:
             return self.space[self.valueindex]
 
     def get_valueindex(self, value=None):
-        """Get the valueindex attribute of the discrete Node object
+        """
+        Get the valueindex attribute of the discrete Node object
 
         :arg value: a legitimate value of the Node object, i.e. the value must
            be in :py:attr:`classes.Node.space`. Otherwise an error occurs. If
@@ -208,12 +214,12 @@ class Node(object):
         else:
             i = 0
             found = False
-            while i<len(self.space) and not found:
-#                if type(self.space[i])==type(value):
+            while i < len(self.space) and not found:
+
                 try:
-                    found = (self.space[i]==value).all()
+                    found = (self.space[i] == value).all()
                 except AttributeError:
-                    found = (self.space[i]==value)
+                    found = (self.space[i] == value)
                 if found:
                     idx = i
                 else:
@@ -222,9 +228,5 @@ class Node(object):
 #                else:
 #                    i += 1
             if not found:
-                raise ValueError('the value %s is not in the space of %s' \
-                                    %(str(value),self.name))
+                raise ValueError('the value %s is not in the space of %s' % (str(value), self.name))
             return idx
-
-
-

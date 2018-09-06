@@ -18,7 +18,8 @@ from pynfg_ros.utilities.utilities import iterated_input_dict
 import warnings
 import sys
 
-class EWMA_MCRL(object):
+
+class EwmaMcrl(object):
     """
     Finds the **uncoordinated** best policy using reinforcement learning.
 
@@ -38,7 +39,8 @@ class EWMA_MCRL(object):
     dictionary containing:
 
     J : int, list, or np.array
-        The number of runs per training episode. If a schedule is desired, enter a list or np.array with size equal to N.
+        The number of runs per training episode. If a schedule is desired,
+        enter a list or np.array with size equal to N.
     N : int
          The number of training episodes
     L0Dist : ndarray, str, None
@@ -89,7 +91,8 @@ class EWMA_MCRL(object):
                     return ps[player][bn]['L0Dist']
 
     def train_node(self, bn, level, setCPT=False):
-        """ Use EWMA MC RL to approximate the optimal CPT at bn given Game
+        """
+        Use EWMA MC RL to approximate the optimal CPT at bn given Game
 
         :arg bn: the basename of the node with the CPT to be trained
         :type bn: str
@@ -97,7 +100,7 @@ class EWMA_MCRL(object):
         :type level: int
         """
         sys.stdout.write('\r')
-        print 'Training ' + bn + ' at level '+ str(level)
+        print 'Training ' + bn + ' at level ' + str(level)
         specs = self.specs
         Game = copy.deepcopy(self.Game)
         player = Game.bn_part[bn][0].player
@@ -105,7 +108,8 @@ class EWMA_MCRL(object):
         J, N, alpha, delta, eps, pureout = basedict['J'], basedict['N'], \
             basedict['alpha'], basedict['delta'], basedict['eps'], \
             basedict['pureout']
-        #Set other CPTs to level-1.  Works even if CPTs aren't pointers.
+
+        # Set other CPTs to level-1.  Works even if CPTs aren't pointers.
         for o_player in Game.players:
             bn_list = list(set(map(lambda x: x.basename, Game.partition[o_player])))
             for base in bn_list:
@@ -151,8 +155,8 @@ class EWMA_MCRL(object):
             for j in xrange(int(J[n])):
                 visitj = set()  # visitj must be cleared at the start of every run
                 for t in xrange(T0, T):
-                    #import pdb; pdb.set_trace()
-                    #Game.bn_part[bn][t-T0].CPT = copy.copy(Game.bn_part[bn][0].CPT)
+                    # import pdb; pdb.set_trace()
+                    # Game.bn_part[bn][t-T0].CPT = copy.copy(Game.bn_part[bn][0].CPT)
                     Game.sample_timesteps(t, t)  # sampling the timestep
                     rew = Game.reward(player, t)  # getting the reward
                     mapair = Game.bn_part[bn][t-T0].get_CPTindex()
@@ -214,6 +218,9 @@ class EWMA_MCRL(object):
                         visitn.add(mapair)
                         visitj.add(mapair)
                         indicaten[mapair] = 1  # only visited actions are updated
+
+
+
             #  update CPT with shift towards Qtable argmax actions.
             shift = Q-V[...,np.newaxis]
             idx = np.nonzero(shift)  # indices of nonzero shifts (avoid divide by 0)
@@ -226,17 +233,18 @@ class EWMA_MCRL(object):
             # normalize after the shift
             CPTsum = Game.bn_part[bn][0].CPT.sum(axis=-1)
             Game.bn_part[bn][0].CPT /= CPTsum[...,np.newaxis]
-        if pureout: #if True, output is a pure policy
+        if pureout:  # if True, output is a pure policy
             Game.bn_part[bn][0].makeCPTpure()
         self.trained_CPTs[player][bn][level] = Game.bn_part[bn][0].CPT
         if setCPT:
             for node in self.Game.bn_part[bn]:
                 node.CPT = Game.bn_part[bn][0].CPT
-        for tau in xrange(1, T-T0): #before exit, make CPTs independent in memory
+
+        for tau in xrange(1, T-T0):  # before exit, make CPTs independent in memory
             Game.bn_part[bn][tau].CPT = copy.copy(Game.bn_part[bn][0].CPT)
         plt.figure()
         plt.plot(Rseries, label = str(bn + ' Level ' + str(level)))
-        #plotting rseries to gauge convergence
+        # plotting rseries to gauge convergence
         plt.legend()
         fig = plt.gcf()
         self.figs[bn][str(level)] = fig
@@ -258,8 +266,8 @@ class EWMA_MCRL(object):
                     self.train_node(controlled, self.high_level, setCPT=setCPT)
 
 
-def mcrl_dict(Game, Level, J, N, delta, alpha=.5, eps=.2, L0Dist=None,
-               pureout=False):
+def mcrl_dict(Game, Level, J, N, delta, alpha=.5, eps=.2, L0Dist=None, pureout=False):
+
     """
     Creates the specs shell for a game to be solved using MCRL.
 
@@ -271,7 +279,7 @@ def mcrl_dict(Game, Level, J, N, delta, alpha=.5, eps=.2, L0Dist=None,
 
     """
     return iterated_input_dict(Game, [('Level', Level)], [('L0Dist', L0Dist), ('J', J),
-                                                      ('N', N), ('delta', delta),
-                                                      ('alpha', alpha), ('eps', eps),
-                                                      ('pureout', pureout)])
+                                                          ('N', N), ('delta', delta),
+                                                          ('alpha', alpha), ('eps', eps),
+                                                          ('pureout', pureout)])
 

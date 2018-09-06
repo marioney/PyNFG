@@ -15,12 +15,13 @@ GNU Affero General Public License
 from __future__ import division
 import inspect
 import numpy as np
-import scipy as sp
 import scipy.stats.distributions as randvars
-from node import *
+from node import Node
+
 
 class ChanceNode(Node):
-    """Implements a chance node of the semi-NFG formalism created by D. Wolpert
+    """
+    Implements a chance node of the semi-NFG formalism created by D. Wolpert
 
     The :class:`classes.ChanceNode` can be initialized with either a
     conditional probability distribution (CPT) or a distribution object
@@ -117,9 +118,9 @@ class ChanceNode(Node):
     * :py:meth:`classes.ChanceNode.logprob()`
 
     """
-    def __init__(self, name, CPTip=None, distip=None, \
-                 description='no description', time=None, basename=None, \
-                 verbose=False):
+    def __init__(self, name, CPTip=None, distip=None,
+                 description='no description', time=None,
+                 basename=None, verbose=False):
         if verbose:
             try:
                 print 'Name: '+ name + '\nDescription: '+ description
@@ -145,8 +146,7 @@ class ChanceNode(Node):
             self.params = distip[1]
             parlist = filter(lambda x: isinstance(x,Node), self.params)
             self.parents = self._set_parent_dict(parlist)
-            self.continuous = (randvars.rv_continuous in \
-                                inspect.getmro(type(self.distribution)))
+            self.continuous = (randvars.rv_continuous in inspect.getmro(type(self.distribution)))
             if self.continuous is False:
                 self.space = distip[2]
             else:

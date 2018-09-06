@@ -13,10 +13,12 @@ GNU Affero General Public License
 """
 
 import numpy as np
-from node import *
+from node import Node
+
 
 class DeterNode(Node):
-    """Implements a deterministic node for the semi-NFG formalism created
+    """
+    Implements a deterministic node for the semi-NFG formalism created
     by D. Wolpert
 
     :arg name: the name of the DeterNode, usually descriptive, e.g. F5 for
@@ -90,12 +92,12 @@ class DeterNode(Node):
     * :py:meth:`classes.DeterNode.logprob()`
 
     """
-    def __init__(self, name, func, params, continuous, space=None, \
-                 description='no description', time=None, basename=None, \
+    def __init__(self, name, func, params, continuous, space=None,
+                 description='no description', time=None, basename=None,
                  verbose=False):
         if verbose:
             try:
-                print 'Name: '+ name + '\nDescription: '+ description
+                print 'Name: ' + name + '\n Description: ' + description
             except TypeError:
                 print('name and description should be strings')
         self.name = name

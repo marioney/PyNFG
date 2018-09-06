@@ -12,14 +12,16 @@ GNU Affero General Public License
 from __future__ import division
 
 import numpy as np
-import scipy as sp
 import copy
 import scipy.stats.distributions as randvars
-from node import *
+from node import Node
 from pynfg_ros.utilities.utilities import convert_2_pureCPT
 
+
 class DecisionNode(Node):
-    """Implements a decision node of the semi-NFG formalism by D. Wolpert
+    """
+
+    Implements a decision node of the semi-NFG formalism by D. Wolpert
 
     The :class:`classes.DecisionNode` can be initialized with either a
     conditional probability distribution (CPT) or a distribution object
@@ -89,13 +91,12 @@ class DecisionNode(Node):
     * :py:meth:`classes.DecisionNode.perturbCPT()`
 
     """
-    def __init__(self, name, player, space, parents=None, \
-                 description='no description', time=None, basename=None, \
+    def __init__(self, name, player, space, parents=None,
+                 description='no description', time=None, basename=None,
                  verbose=False):
         if verbose:
             try:
-                print ('Name: '+ name + '\nDescription: '+ description + \
-                    '\nPlayer: '+ player)
+                print ('Name: ' + name + '\n Description: ' + description + '\n Player: ' + player)
             except (AttributeError, TypeError):
                 raise AssertionError('name, description, \
                                      player should be strings')
@@ -121,7 +122,8 @@ class DecisionNode(Node):
         return self.name
 
     def _createCPT(self):
-        """Create a CPT of the correct size with zeros for the DecisionNode
+        """
+        Create a CPT of the correct size with zeros for the DecisionNode
 
         Uses the order of the parents in the parent list as entered by the user
         to initialize the DecisionNode object and the sizes of space attributes
@@ -237,8 +239,7 @@ class DecisionNode(Node):
         else:
             return z
 
-    def perturbCPT(self, noise, mixed=True, setCPT=True, \
-                   returnweight=False):
+    def perturbCPT(self, noise, mixed=True, setCPT=True, returnweight=False):
         """Create a perturbation of the CPT attribute.
 
         :arg noise: The noise determines the mixture between the current CPT
@@ -380,8 +381,11 @@ class DecisionNode(Node):
         else:
             return convert_2_pureCPT(copy.copy(self.CPT))
 
+
 def perturbpure(CPT, noise, returnweight):
-    # Generate noise for each possible combination of parent node values and reshape
+    """"
+    Generate noise for each possible combination of parent node values and reshape
+    """
     oldCPT = copy.copy(CPT)
     shape = CPT.shape
     nmessages = np.prod(shape[:-1])

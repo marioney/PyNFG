@@ -34,21 +34,21 @@ def lqre(eus, beta):
     return num/denom
 
 
-alpha = .8  #high_given_high
-gamma = .3  #high_given_low
+alpha = .8  # high_given_high
+gamma = .3  # high_given_low
 
 
 def phigh(signal):
-    if signal =='h':
-        return alpha*.5/(alpha*.5 +gamma*.5)
+    if signal == 'h':
+        return alpha*.5/(alpha*.5 + gamma*.5)
     if signal == 'l':
-        return .5*(1-alpha)/(.5*(1-alpha) + .5 * (1-gamma))
+        return .5*(1 - alpha)/(.5*(1 - alpha) + .5 * (1 - gamma))
 
 
 def plow(signal):
-    if signal =='h':
+    if signal == 'h':
         return gamma*.5/(gamma*.5 + alpha*.5)
-    if signal =='l':
+    if signal == 'l':
         return .5 *(1-gamma) / (.5*(1-gamma) + .5*(1-alpha))
 
 
@@ -70,14 +70,14 @@ def treylk(signal, mikeshigh=probs, mikeslow=probs,
 
 def mikelk(signal, treyhigh = probs, treylow = probs,
            beta=.01, returnEU=False):
-    if signal =='h':
+    if signal == 'h':
         high_m = phigh('h')
         EU = (high_m * EU_H(strats, treyhigh) +
               (1-high_m)*EU_L(strats, treylow))
         if returnEU:
             return EU
         return lqre(EU, beta)
-    if signal =='l':
+    if signal == 'l':
         high_m = phigh('l')
         EU = (high_m * EU_H(strats, treyhigh) +
               (1-high_m)*EU_L(strats, treylow))
@@ -113,15 +113,15 @@ def genCPT(Lmike=3, Ltrey=3):
 # The level 2 Logit QRE equilibrium strategy
 CPTs = genCPT(2,2)
 
-import pynfg as pynfg
+import pynfg_ros as pynfg
 market = pynfg.ChanceNode('market', (np.array([.5,.5]), [], ['h', 'l']))
 trey = pynfg.DecisionNode('trey', 'trey', list(np.arange(10,70,10)),
-                          parents =[market])
+                          parents=[market])
 mikes_signal = pynfg.ChanceNode('mikes_signal',
                                 (np.array([[.8,.2], [.3,.7]]),
                                  [market], ['hi', 'l0']))
 mike = pynfg.DecisionNode('mike', 'mike', list(np.arange(10,70,10)),
-                          parents = [mikes_signal])
+                          parents=[mikes_signal])
 
 
 def umike(market, trey, mike):
@@ -136,6 +136,7 @@ def utrey(market, trey, mike):
         return trey*(200-2*(mike+trey)) - trey
     if market == 'l':
         return trey * (90-(mike+trey)) - trey
+
 
 utils = {'mike': umike, 'trey': utrey}
 

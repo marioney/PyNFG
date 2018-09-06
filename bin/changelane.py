@@ -25,14 +25,10 @@ GNU Affero General Public License
 """
 from __future__ import division
 
-from setuptools.command.rotate import rotate
-
-from pynfg_ros import DeterNode, ChanceNode
+from pynfg_ros import DeterNode, ChanceNode, DecisionNode
 from pynfg_ros.levelksolutions.mcrl import *
 from pynfg_ros.pgtsolutions.intelligence.policy import *
 import numpy as np
-import time
-import copy
 
 ###########################################
 # PARAMETERS AND FUNCTIONS
@@ -251,12 +247,12 @@ def slow_car_reward(F):
 # rewards dictionary
 
 
-rfuncs = {'fast_car': fast_car_reward, 'slow_car': slow_car_reward}
+reward_funcs = {'fast_car': fast_car_reward, 'slow_car': slow_car_reward}
 
 ##################################
 # CREATING THE iterSemiNFG
 ##################################
-G = iterSemiNFG(nodeset, rfuncs)
+G = iterSemiNFG(nodeset, reward_funcs)
 
 # making a set of the names of the first two time steps for visualization
 # drawset = set([n.name for n in G.time_partition[0]]).union(set([n.name for n in G.time_partition[1]]))
@@ -339,98 +335,4 @@ valuedict = G.sample_timesteps(G.starttime, G.endtime, basenames=['F'])
 print valuedict['F']
 
 
-
-# Use the game attribute of MCRL_solved with appropriate CPTs to perform PGT
-
-G1 = copy.deepcopy(MCRL_solved.Game)
-
-############################################
-# PGT INTELLIGENCE ESTIMATION
-############################################
-
-
-def captures(G):
-    """
-    defining a welfare metric on G
-    :param G: Game to evaluate
-    :return: Aveage number of captures
-    """
-    T0 = G.starttime
-    T = G.endtime
-    G.sample()
-    num_captures = G.npv_reward('fast_car', T0, 1)
-    # print '  Cap: %s' % str(num_captures) + '\r'
-    return num_captures/(T-T0)
-
-
-def density(iq):
-    """
-    Defining a PGT posterior on iq profiles (dict)
-    :param iq:
-    :return:
-    """
-    x = iq.values()
-    y = np.power(x, 2)
-    z = np.prod(y)
-    return z
-
-
-GG = copy.deepcopy(G1)
-# NOTE: the CPTs of G are seeds for MH and MC sampling
-
-# number of samples
-S = 20
-
-# number of samples of utility of G in calculating iq
-X = 10
-# number of alternative strategies sampled in calculating iq
-M = 20
-# noise in the perturbations of G for MH or MC sampling
-noise = .2
-# satisfying distribution noise for iq calculations
-innoise = noise
-# number of draws to burn for MH
-burn = 10
-
-
-# tipoff = time.time()print obsnoiseCPT
-
-# starting a timer
-
-# Importance Samping estimation of PGT posterior
-intelMC, funcoutMC, weightMC = policy_MC(GG, S, noise, X, M,
-                                         innoise=.2,
-                                         delta=1,
-                                         integrand=captures,
-                                         mix=False,
-                                         satisfice=GG)
-# halftime = time.time()
-# print (halftime-tipoff)
-
-# Metropolis-Hastings estimation of PGT posterior
-#intelMH, funcoutMH, densMH = policy_MH(GG, S, density, noise, X, M,
-#                                       innoise=.2,
-#                                       delta=1,
-#                                       integrand=captures,
-#                                       mix=False,
-#                                       satisfice=GG)
-# buzzer = time.time()  # type: float
-
-# Printing elapsed times
-# T = halftime-tipoff
-# print ('MC took:', T,  'sec., ', T/60, 'min., or', T/3600, 'hr.')
-# T = buzzer-halftime
-# print ('MH took:', T,  'sec., ', T/60, 'min., or', T/3600, 'hr.')
-
-###########################################
-# PLOTTING PGT RESULTS
-###########################################
-# creating the importance sampling weights from MC
-MCweight = [density(intelMC[s])/np.prod(weightMC[s].values()) for s in xrange(1, S+1)]
-# the PGT distributions over welfare values
-
-fig1, ax1 = plt.subplots(1)
-ax1.hist(funcoutMC.values(), weights=MCweight, alpha=.5)
-#fig2, ax2 = plt.subplots(1)
-#ax2.hist(funcoutMH.values()[burn::], alpha=.5)
 plt.show()

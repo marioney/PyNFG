@@ -13,9 +13,8 @@ GNU Affero General Public License
 """
 
 from __future__ import division
-import numpy as np
-import scipy as sp
 from seminfg import *
+
 
 class iterSemiNFG(SemiNFG):
     """Implements the iterated semi-NFG formalism created by D. Wolpert
@@ -126,7 +125,8 @@ class iterSemiNFG(SemiNFG):
             self.bn_part[bn].sort(key=lambda nod: nod.time)
 
     def reward(self, player, t, nodeinput=None):
-        """Evaluate the reward of the specified player in the specified time.
+        """
+        Evaluate the reward of the specified player in the specified time.
 
         :arg player: The name of a player with a reward function specified.
         :type player: str.

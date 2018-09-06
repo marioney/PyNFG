@@ -13,13 +13,14 @@ GNU Affero General Public License
 from __future__ import division
 import copy
 import numpy as np
-from pynfg import DecisionNode, iterSemiNFG
-from pynfg.utilities.utilities import mh_decision
+from pynfg_ros import iterSemiNFG
+from pynfg_ros.utilities.utilities import mh_decision
 import sys
 
-def policy_MC(G, S, noise, X, M, innoise=1, delta=1, integrand=None, \
-                mix=False, satisfice=None):
-    """Run Importance Sampling on policies for PGT Intelligence Calculations
+
+def policy_MC(G, S, noise, X, M, innoise=1, delta=1, integrand=None, mix=False, satisfice=None):
+    """
+    Run Importance Sampling on policies for PGT Intelligence Calculations
 
     For examples, see below or PyNFG/bin/hideandseek.py
 
@@ -93,38 +94,38 @@ def policy_MC(G, S, noise, X, M, innoise=1, delta=1, integrand=None, \
                                                  satisfice=GG)
 
     """
-    intel = {} #keys are sample indices, vals are iq dictionaries
-    iq = {} #keys are player names, vals are iqs
-    weight = {} #keys are
+    intel = {}     # keys are sample indices, vals are iq dictionaries
+    iq = {}        # keys are player names, vals are iqs
+    weight = {}    # keys are
     w = {}
-    funcout = {} #keys are s in S, vals are eval of integrand of G(s)
+    funcout = {}   # keys are s in S, vals are eval of integrand of G(s)
     bndict = {}
     T0 = G.starttime
-    for p in G.players: #getting player-keyed dict of basenames
+    for p in G.players:  # getting player-keyed dict of basenames
         bndict[p] = [x.basename for x in G.partition[p] if x.time==T0]
-    for s in xrange(1, S+1): #sampling S policy profiles
+    for s in xrange(1, S+1):  # sampling S policy profiles
         sys.stdout.write('\r')
         sys.stdout.write('MC Sample ' + str(s))
         sys.stdout.flush()
         GG = copy.deepcopy(G)
         for p in G.players:
             w[p] = 1
-            for bn in bndict[p]: #getting importance weights for each player
-                w[p] *= GG.bn_part[bn][0].perturbCPT(noise, mixed=mix, \
-                                                            returnweight=True)
+            for bn in bndict[p]:  # getting importance weights for each player
+                w[p] *= GG.bn_part[bn][0].perturbCPT(noise, mixed=mix, returnweight=True)
                 for dn in GG.bn_part[bn][1::]:
                     dn.CPT = GG.bn_part[bn][0].CPT
-        for p in G.players: #find the iq of each player's policy in turn
+        for p in G.players:  # find the iq of each player's policy in turn
             iq[p] = policy_calciq(p, GG, X, M, mix, delta, innoise, satisfice)
         if integrand is not None:
-            funcout[s] = integrand(GG) #eval integrand G(s), assign to funcout
+            funcout[s] = integrand(GG)  # eval integrand G(s), assign to funcout
         intel[s] = copy.deepcopy(iq)
         weight[s] = copy.deepcopy(w)
     return intel, funcout, weight
 
-def policy_MH(G, S, density, noise, X, M, innoise=1, delta=1, \
-                integrand=None, mix=False, satisfice=None):
-    """Run Metropolis-Hastings on policies for PGT Intelligence Calculations
+
+def policy_MH(G, S, density, noise, X, M, innoise=1, delta=1, integrand=None, mix=False, satisfice=None):
+    """
+    Run Metropolis-Hastings on policies for PGT Intelligence Calculations
 
     For examples, see below or PyNFG/bin/hideandseek.py
 
@@ -206,30 +207,30 @@ def policy_MH(G, S, density, noise, X, M, innoise=1, delta=1, \
                                                satisfice=GG)
 
     """
-    intel = {} #keys are s in S, vals are iq dict (dict of dicts)
-    iq = {} #keys are base names, iq timestep series
-    funcout = {} #keys are s in S, vals are eval of integrand of G(s)
-    dens = np.zeros(S+1) #storing densities for return
-    bndict = {} #mapping from player name to DN basenames
+    intel = {}  # keys are s in S, vals are iq dict (dict of dicts)
+    iq = {}  # keys are base names, iq timestep series
+    funcout = {}  # keys are s in S, vals are eval of integrand of G(s)
+    dens = np.zeros(S+1)  # storing densities for return
+    bndict = {}  # mapping from player name to DN basenames
     T0 = G.starttime
-    for p in G.players: #getting player-keyed dict of basenames
+    for p in G.players:  # getting player-keyed dict of basenames
         bndict[p] = [x.basename for x in G.partition[p] if x.time==T0]
-    for s in xrange(1, S+1): #sampling S sequences of policy profiles
+    for s in xrange(1, S+1):  # sampling S sequences of policy profiles
         sys.stdout.write('\r')
         sys.stdout.write('MH Sample ' + str(s))
         sys.stdout.flush()
         GG = copy.deepcopy(G)
-        for p in G.players: #taking the new MH draw
+        for p in G.players:  # taking the new MH draw
             for bn in bndict[p]:
                 GG.bn_part[bn][0].perturbCPT(noise, mixed=mix)
                 for dn in GG.bn_part[bn][1::]:
                     dn.CPT = GG.bn_part[bn][0].CPT
-        for p in GG.players: #getting iq for each player with new MH draw
+        for p in GG.players:  # getting iq for each player with new MH draw
             iq[p] = policy_calciq(p, GG, X, M, mix, delta, innoise, satisfice)
         # The MH decision
-        current_dens = density(iq) #evaluating density of current draw's iq
-        verdict = mh_decision(current_dens, dens[s-1]) #True if accept new draw
-        if verdict: #accepting new CPT
+        current_dens = density(iq)  # evaluating density of current draw's iq
+        verdict = mh_decision(current_dens, dens[s-1])  # True if accept new draw
+        if verdict:  # accepting new CPT
             intel[s] = copy.deepcopy(iq)
             G = copy.deepcopy(GG)
             dens[s] = current_dens
@@ -237,8 +238,9 @@ def policy_MH(G, S, density, noise, X, M, innoise=1, delta=1, \
             intel[s] = intel[s-1]
             dens[s] = dens[s-1]
         if integrand is not None:
-            funcout[s] = integrand(G) #eval integrand G(s), assign to funcout
+            funcout[s] = integrand(G)  # eval integrand G(s), assign to funcout
     return intel, funcout, dens[1::]
+
 
 def policy_calciq(p, G, X, M, mix, delta, innoise, satisfice=None):
     """Estimate IQ of player's policy

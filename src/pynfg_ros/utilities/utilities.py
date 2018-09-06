@@ -14,6 +14,7 @@ GNU Affero General Public License
 from __future__ import division
 import numpy as np
 import copy
+from pynfg_ros.classes.seminfg import SemiNFG
 
 
 
@@ -30,7 +31,7 @@ def mceu(Game, dn, N, tol=30, delta=1, verbose=False):
     :type tol: int
 
     """
-    if type(Game) == pynfg.classes.seminfg.SemiNFG:
+    if type(Game) == SemiNFG:
         return _mceu_static(Game, dn, N, tol, verbose)
     else:
         return _mceu_iterated(Game, dn, N, tol, delta,  verbose)

@@ -17,6 +17,7 @@ import copy
 import numpy as np
 from pynfg_ros.utilities.utilities import convert_2_pureCPT, mceu, input_dict, iterated_input_dict
 import warnings
+from pynfg_ros import DecisionNode
 
 
 
@@ -132,7 +133,7 @@ class BestResponse(object):
         Game = copy.deepcopy(self.Game)  # copy in order to maintain original CPT
         ps = self.specs
         for node in Game.node_dict.values():  # Game changes, self.Game doesn't
-            if type(node) is pynfg.DecisionNode:
+            if type(node) is DecisionNode:
                 try:
                     node.CPT = node.LevelCPT[level - 1]
                 except KeyError:

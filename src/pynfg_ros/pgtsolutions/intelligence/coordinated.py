@@ -12,13 +12,14 @@ GNU Affero General Public License
 from __future__ import division
 import copy
 import numpy as np
-from pynfg import DecisionNode, iterSemiNFG
-from pynfg.utilities.utilities import mh_decision
+from pynfg_ros import iterSemiNFG
+from pynfg_ros.utilities.utilities import mh_decision
 import sys
 
-def coordinated_MC(G, S, noise, X, M, innoise=1, delta=1, integrand=None, \
-                mix=False, satisfice=None):
-    """Run Importance Sampling on strategies for PGT Intelligence Calculations
+
+def coordinated_MC(G, S, noise, X, M, innoise=1, delta=1, integrand=None, mix=False, satisfice=None):
+    """
+    Run Importance Sampling on strategies for PGT Intelligence Calculations
 
     For examples, see below or PyNFG/bin/stackelberg.py for SemiNFG or
     PyNFG/bin/hideandseek.py for iterSemiNFG
@@ -108,8 +109,8 @@ def coordinated_MC(G, S, noise, X, M, innoise=1, delta=1, integrand=None, \
         weight[s] = copy.deepcopy(w)
     return intel, funcout, weight
 
-def coordinated_MH(G, S, density, noise, X, M, innoise=1, delta=1, \
-                integrand=None, mix=False, satisfice=None):
+
+def coordinated_MH(G, S, density, noise, X, M, innoise=1, delta=1, integrand=None, mix=False, satisfice=None):
     """Run Metropolis-Hastings on strategies for PGT Intelligence Calculations
 
     For examples, see below or PyNFG/bin/stackelberg.py for SemiNFG or
@@ -185,25 +186,24 @@ def coordinated_MH(G, S, density, noise, X, M, innoise=1, delta=1, \
                                                     satisfice=GG)
 
     """
-    intel = {} #keys are s in S, vals are iq dict (dict of dicts)
-    iq = {} #keys are base names, iq timestep series
-    funcout = {} #keys are s in S, vals are eval of integrand of G(s)
-    dens = np.zeros(S+1) #storing densities for return
-    for s in xrange(1, S+1): #sampling S sequences of policy profiles
+    intel = {}  # keys are s in S, vals are iq dict (dict of dicts)
+    iq = {}  # keys are base names, iq timestep series
+    funcout = {}  # keys are s in S, vals are eval of integrand of G(s)
+    dens = np.zeros(S+1)  # storing densities for return
+    for s in xrange(1, S+1):  # sampling S sequences of policy profiles
         sys.stdout.write('\r')
         sys.stdout.write('MH Sample ' + str(s))
         sys.stdout.flush()
         GG = copy.deepcopy(G)
         for p in GG.players:
-            for dn in GG.partition[p]: #drawing current policy
+            for dn in GG.partition[p]:  # drawing current policy
                 dn.perturbCPT(noise, mixed=mix)
-        for p in GG.players:#getting iq
-            iq[p] = coordinated_calciq(p, GG, X, M, mix, delta, innoise, \
-                                       satisfice)
+        for p in GG.players:  # getting iq
+            iq[p] = coordinated_calciq(p, GG, X, M, mix, delta, innoise, satisfice)
         # The MH decision
         current_dens = density(iq)
         verdict = mh_decision(current_dens, dens[s-1])
-        if verdict: #accepting new CPT
+        if verdict:  # accepting new CPT
             intel[s] = copy.deepcopy(iq)
             G = copy.deepcopy(GG)
             dens[s] = current_dens
@@ -211,11 +211,13 @@ def coordinated_MH(G, S, density, noise, X, M, innoise=1, delta=1, \
             intel[s] = intel[s-1]
             dens[s] = dens[s-1]
         if integrand is not None:
-            funcout[s] = integrand(G) #eval integrand G(s), assign to funcout
+            funcout[s] = integrand(G)  # eval integrand G(s), assign to funcout
     return intel, funcout, dens[1::]
 
+
 def coordinated_calciq(p, G, X, M, mix, delta, innoise, satisfice=None):
-    """Estimate IQ of player's strategy
+    """
+    Estimate IQ of player's strategy
 
     :arg p: the name of the player whose intelligence is being evaluated.
     :type p: str
@@ -252,28 +254,28 @@ def coordinated_calciq(p, G, X, M, mix, delta, innoise, satisfice=None):
     for x in xrange(1,X+1):
         G.sample()
         util = (ufoo(*uargs)+(x-1)*util)/x
-    if satisfice: #using the satisficing distribution for drawing alternatives
+    if satisfice:  # using the satisficing distribution for drawing alternatives
         G = copy.deepcopy(satisfice)
     cptdict = G.get_decisionCPTs()
     smalldict = {dn.name: cptdict[dn.name] for dn in G.partition[p]}
-    for m in range(M): #Sample M alt policies for the player
+    for m in range(M):  # Sample M alt policies for the player
         G.set_CPTs(smalldict)
-        for dn in G.partition[p]: #rand CPT for the DN
-            #density for the importance sampling distribution
+        for dn in G.partition[p]:  # rand CPT for the DN
+            # density for the importance sampling distribution
             if innoise == 1 or satisfice:
                 dn.perturbCPT(innoise, mixed=mix)
                 denw=1
             else:
                 denw = dn.perturbCPT(innoise, mixed=mix, returnweight=True)
             if not tick:
-                numw = denw #scaling constant num to ~ magnitude of den
+                numw = denw  # scaling constant num to ~ magnitude of den
             weight[m] *= (numw/denw)
             tick += 1
-        G.sample() #sample altpolicy prof. to end of net
+        G.sample()  # sample altpolicy prof. to end of net
         if isinstance(G, iterSemiNFG):
             altutil[m] = G.npv_reward(p, G.starttime, delta)
         else:
             altutil[m] = G.utility(p)
-    #weight of alts worse than G
+    # weight of alts worse than G
     worse = [weight[m] for m in range(M) if altutil[m]<util]
-    return np.sum(worse)/np.sum(weight) #fraction of alts worse than G is IQ
+    return np.sum(worse)/np.sum(weight)  # fraction of alts worse than G is IQ

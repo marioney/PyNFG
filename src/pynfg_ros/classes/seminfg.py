@@ -14,12 +14,13 @@ GNU Affero General Public License
 
 from __future__ import division
 import numpy as np
-import scipy as sp
 import networkx as nx
 from networkx.drawing.nx_agraph import graphviz_layout
 import inspect
 import matplotlib.pyplot as plt
-from pynfg_ros import DecisionNode, DeterNode, ChanceNode
+
+
+# DeterNode, ChanceNode
 
 
 class SemiNFG(object):
