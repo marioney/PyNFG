@@ -21,8 +21,8 @@ GNU Affero General Public License
 from __future__ import division
 
 import numpy as np
-from pynfg import DecisionNode, ChanceNode, DeterNode
-from pynfg import SemiNFG
+from pynfg_ros import DecisionNode, ChanceNode, DeterNode
+from pynfg_ros import SemiNFG
 import matplotlib.pyplot as plt
 import time
 import copy
@@ -173,8 +173,7 @@ print 'MH took:', T,  'sec., ', T/60, 'min., or', T/3600, 'hr.'
 MCiqQ1 = [intelMC[s]['1'] for s in xrange(1,S+1)]
 MHiqQ1 = [intelMH[s]['1'] for s in xrange(1,S+1)]
 #creating the importance sampling weights from MC
-MCweight = [density(intelMC[s])/np.prod(weightMC[s].values()) for s in \
-            xrange(1,S+1)]
+MCweight = [density(intelMC[s])/np.prod(weightMC[s].values()) for s in xrange(1,S+1)]
 #the PGT distribution over intelligence values for player 1
 plt.figure()
 plt.hist(MCiqQ1, normed=True, weights=MCweight, alpha=0.5)
