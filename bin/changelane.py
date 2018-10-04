@@ -43,20 +43,20 @@ south = 0
 
 left = np.array([-1, 1])
 right = np.array([1, 1])
-remain = np.array([0, 1])
+remain = np.array([0, 2])
 
 
-remain_f = np.array([0, 2])
+remain_f = np.array([0, 3])
 slow = np.array([0, 1])
 
 # space of actions that players can choose
 actionspace_s = [left, right, remain]
 actionspace_f = [left, right, slow, remain_f]
 # time steps
-T = 7
+T = 5
 
 # starting locations
-startingloc = np.array([[west, south], [west, south+2]])
+startingloc = np.array([[west, south], [west, south+1]])
 
 
 # observational noise CPT (left, right, stay)
@@ -219,11 +219,16 @@ def fast_car_reward(F):
     reward = 0
     if np.array_equal(F[0], F[1]):
         reward -= 1000
-    if F[0][0] == 1:
-        reward -= 1
-    reward += F[0][1]
-    sys.stdout.write('\r')
-    sys.stdout.write(' s: ' + str(F[0]) + ' h: ' + str(F[1]) + ' r: ' + str(reward))
+    # if F[0][0] == 1:
+    #    reward -= 0.1
+    if F[0][1] > F[1][1]:
+        reward += 10
+
+    # else:
+    #    reward += F[0][1] / 2
+    # reward += F[0][1]
+    # sys.stdout.write('\r')
+    # sys.stdout.write(' s: ' + str(F[0]) + ' h: ' + str(F[1]) + ' r: ' + str(reward))
     return reward
 
 
@@ -238,9 +243,12 @@ def slow_car_reward(F):
         reward -= 1000
     if F[1][0] == 1:
         reward -= 1
-    reward += F[0][1]
-    sys.stdout.write('\r')
-    sys.stdout.write(' s: ' + str(F[0]) + ' h: ' + str(F[1]) + ' r: ' + str(reward))
+    if F[1][1] > 5:
+        reward += F[1][1]
+    # else:
+    #    reward += F[1][1] / 2
+    # sys.stdout.write('\r')
+    # sys.stdout.write(' s: ' + str(F[0]) + ' h: ' + str(F[1]) + ' r: ' + str(reward))
     return reward
 
 
@@ -256,9 +264,9 @@ G = iterSemiNFG(nodeset, reward_funcs)
 
 # making a set of the names of the first two time steps for visualization
 # drawset = set([n.name for n in G.time_partition[0]]).union(set([n.name for n in G.time_partition[1]]))
-drawset = set([n.name for n in G.time_partition[0]])
+# drawset = set([n.name for n in G.time_partition[0]])
 
-G.draw_graph(drawset)
+# G.draw_graph(drawset)
 
 # visualizing the first two time steps of the net
 
@@ -266,9 +274,9 @@ G.draw_graph(drawset)
 # MANIPULATING CPTs
 ###########################################
 # Giving hider a uniform CPT
-G.bn_part['Dfast'][0].uniformCPT()
+G.bn_part['Dfast'][0].randomCPT(mixed=True) # .uniformCPT()
 # Giving seeker a pure random CPT
-G.bn_part['Dslow'][0].uniformCPT()
+G.bn_part['Dslow'][0].randomCPT(mixed=True) # .uniformCPT()
 # G.bn_part['Dseek'][0].randomCPT(mixed=False)
 # pointing all CPTs to time 0 CPT
 cptdict = G.get_decisionCPTs(mode='basename')
@@ -305,7 +313,7 @@ G.set_CPTs(cptdict)
 
 # Generate the dictionary of inputs
 N = 40
-mcrl_params = mcrl_dict(G, 1, np.linspace(50, 1, N), N, 1, np.linspace(.5, 1, N),
+mcrl_params = mcrl_dict(G, 1, np.linspace(100, 1, N), N, 1, np.linspace(.5, 1, N),
                         np.linspace(.2, 1, N),  L0Dist='uniform', pureout=True)
 
 MCRL_solved = EwmaMcrl(G, mcrl_params)
@@ -320,19 +328,46 @@ MCRL_solved.solve_game(setCPT=True)
 
 MCRL_solved.train_node('Dfast', 2, setCPT=True)
 MCRL_solved.train_node('Dslow', 2, setCPT=True)
-MCRL_solved.train_node('Dfast', 3, setCPT=True)
+#MCRL_solved.train_node('Dfast', 3, setCPT=True)
+#
 
-valuedict = G.sample_timesteps(G.starttime, G.endtime, basenames=['F'])
-print valuedict['F']
+
+#
+#
+# valuedict = G.sample_timesteps(G.starttime, G.endtime, basenames=['F'])
+# print valuedict['F']
+#
+#
+# print 'try'
+# valuedict = G.sample_timesteps(G.starttime, G.endtime, basenames=['F'])
+# print valuedict['F']
+
+
+# # node in G.bn_part['Dfast']:
+# print 'Dfast 0'
+# print G.bn_part['Dfast'][0].CPT
+# print 'Dfast solved 0'
+# print MCRL_solved.Game.bn_part['Dfast'][0].CPT
+# # node in G.bn_part['Dfast']:
+# print 'Dslow 0'
+# print G.bn_part['Dslow'][0].CPT
+# print 'Dslow solved 0'
+# print MCRL_solved.Game.bn_part['Dslow'][0].CPT
+# # plt.show()
 
 print 'try'
 valuedict = G.sample_timesteps(G.starttime, G.endtime, basenames=['F'])
 print valuedict['F']
 
+print 'try'
+valuedict = MCRL_solved.Game.sample_timesteps(G.starttime, G.endtime, basenames=['F'])
+print valuedict['F']
+
 
 print 'try'
 valuedict = G.sample_timesteps(G.starttime, G.endtime, basenames=['F'])
 print valuedict['F']
 
-
-plt.show()
+print 'try'
+valuedict = MCRL_solved.Game.sample_timesteps(G.starttime, G.endtime, basenames=['F'])
+print valuedict['F']

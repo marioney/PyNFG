@@ -146,8 +146,11 @@ class iterSemiNFG(SemiNFG):
         for nam in nodenames:
             if nam in nodeinput:
                 kw[nam] = nodeinput[nam]
+            elif nam is 'player':
+                kw[nam] = player
             else:
                 kw[nam] = self.bn_part[nam][t-self.starttime].get_value()
+
         r = self.r_functions[player](**kw)
         return r
 

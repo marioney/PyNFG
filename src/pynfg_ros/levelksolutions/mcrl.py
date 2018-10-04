@@ -219,20 +219,18 @@ class EwmaMcrl(object):
                         visitj.add(mapair)
                         indicaten[mapair] = 1  # only visited actions are updated
 
-
-
             #  update CPT with shift towards Qtable argmax actions.
             shift = Q-V[...,np.newaxis]
             idx = np.nonzero(shift)  # indices of nonzero shifts (avoid divide by 0)
             # normalizing shifts to be a % of message's biggest shift
-            shiftnorm = np.absolute(shift).max(axis=-1)[...,np.newaxis]
+            shiftnorm = np.absolute(shift).max(axis=-1)[..., np.newaxis]
             # for each mapair shift only eps% of the percent shift
             updater = eps[n]*indicaten*Game.bn_part[bn][0].CPT/shiftnorm
             # increment the CPT
             Game.bn_part[bn][0].CPT[idx] += updater[idx]*shift[idx]
             # normalize after the shift
             CPTsum = Game.bn_part[bn][0].CPT.sum(axis=-1)
-            Game.bn_part[bn][0].CPT /= CPTsum[...,np.newaxis]
+            Game.bn_part[bn][0].CPT /= CPTsum[..., np.newaxis]
         if pureout:  # if True, output is a pure policy
             Game.bn_part[bn][0].makeCPTpure()
         self.trained_CPTs[player][bn][level] = Game.bn_part[bn][0].CPT
@@ -243,7 +241,7 @@ class EwmaMcrl(object):
         for tau in xrange(1, T-T0):  # before exit, make CPTs independent in memory
             Game.bn_part[bn][tau].CPT = copy.copy(Game.bn_part[bn][0].CPT)
         plt.figure()
-        plt.plot(Rseries, label = str(bn + ' Level ' + str(level)))
+        plt.plot(Rseries, label=str(bn + ' Level ' + str(level)))
         # plotting rseries to gauge convergence
         plt.legend()
         fig = plt.gcf()

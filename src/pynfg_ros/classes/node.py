@@ -9,6 +9,7 @@ GNU Affero General Public License
 """
 
 from collections import OrderedDict
+from numpy import array_equal
 
 
 class Node(object):
@@ -215,7 +216,6 @@ class Node(object):
             i = 0
             found = False
             while i < len(self.space) and not found:
-
                 try:
                     found = (self.space[i] == value).all()
                 except AttributeError:
@@ -229,4 +229,5 @@ class Node(object):
 #                    i += 1
             if not found:
                 raise ValueError('the value %s is not in the space of %s' % (str(value), self.name))
+
             return idx
