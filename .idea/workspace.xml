@@ -5,7 +5,16 @@
     <bookmark url="file://$PROJECT_DIR$/bin/mergeA.py" line="696" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ffd3691c-77af-4a4f-a443-e017b03b21bd" name="Default Changelist" comment="" />
+    <list default="true" id="ffd3691c-77af-4a4f-a443-e017b03b21bd" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/aux_functionsITSC.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/aux_functionsITSC2.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/aux_functionsITSC3.py" beforeDir="false" afterPath="$PROJECT_DIR$/bin/aux_functions.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/mergeITSC.py" beforeDir="false" afterPath="$PROJECT_DIR$/bin/mergeITSC.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/mergeITSC2.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/mergeITSC3.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/stackelberg.py" beforeDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -14,10 +23,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/bin/mergeITSC.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-374">
+            <state relative-caret-position="8364">
               <caret line="492" column="31" selection-start-line="492" selection-start-column="31" selection-end-line="492" selection-end-column="31" />
               <folding>
                 <element signature="e#999#1030#0" expanded="true" />
@@ -38,11 +47,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/bin/aux_functionsITSC3.py">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/bin/aux_functions.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-122">
-              <caret line="205" column="21" selection-start-line="205" selection-start-column="21" selection-end-line="205" selection-end-column="21" />
+            <state relative-caret-position="2819">
+              <caret line="240" column="60" selection-start-line="240" selection-start-column="60" selection-end-line="240" selection-end-column="60" />
             </state>
           </provider>
         </entry>
@@ -78,6 +87,11 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="PUSH_TAGS">
       <GitPushTagMode />
     </option>
@@ -377,7 +391,14 @@
       <option name="project" value="LOCAL" />
       <updated>1557220685960</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="Uptade to last version, sent to itsc">
+      <created>1557222516482</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1557222516482</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TodoView" selected-index="4">
@@ -711,20 +732,20 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/bin/aux_functions.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2819">
+          <caret line="240" column="60" selection-start-line="240" selection-start-column="60" selection-end-line="240" selection-end-column="60" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/bin/mergeITSC.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-374">
+        <state relative-caret-position="8364">
           <caret line="492" column="31" selection-start-line="492" selection-start-column="31" selection-end-line="492" selection-end-column="31" />
           <folding>
             <element signature="e#999#1030#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/bin/aux_functionsITSC3.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-122">
-          <caret line="205" column="21" selection-start-line="205" selection-start-column="21" selection-end-line="205" selection-end-column="21" />
         </state>
       </provider>
     </entry>

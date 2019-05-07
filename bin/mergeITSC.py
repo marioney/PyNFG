@@ -30,7 +30,7 @@ from pynfg_ros import DeterNode, ChanceNode, DecisionNode
 from pynfg_ros.levelksolutions.mcrl import *
 from pynfg_ros.pgtsolutions.intelligence.policy import *
 
-from aux_functionsITSC3 import *
+from aux_functions import *
 
 
 ###########################################
