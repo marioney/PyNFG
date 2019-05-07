@@ -26,38 +26,13 @@ GNU Affero General Public License
 """
 from __future__ import division
 
+
 from pynfg_ros import DeterNode, ChanceNode, DecisionNode
 from pynfg_ros.levelksolutions.mcrl import *
 from pynfg_ros.pgtsolutions.intelligence.policy import *
 import numpy as np
 
-
-def check_collision(current_pose, pose_array):
-    """
-    :param current_pose: Pose being evaluated
-    :param pose_array:   List of occupied poses.
-    :return: True if a collision is found, False otherwise
-    """
-    # print 'pose array shape' + str(pose_array.shape)
-    if pose_array is None:
-        return True
-    if pose_array.ndim is 1:
-        if np.array_equal(current_pose, pose_array):
-            # print ' Collission in pose' + str(current_pose)
-            return True
-
-    else:
-        [rows, cols] = pose_array.shape
-        if cols is not 2:
-            print 'pose array should have 2 cols - it has ' + str(cols)
-            return True
-
-        for index_compare in range(0, rows):
-            if np.array_equal(current_pose, pose_array[index_compare]):
-                # print 'new_pose ' + str(current_pose) + 'in collision with car ' + str(index_compare)
-                return True
-
-    return False
+from aux_functions import check_collision, read_training_values, store_training_values
 
 
 ###########################################
@@ -66,7 +41,7 @@ def check_collision(current_pose, pose_array):
 # boundaries of the grid
 west = 0
 east = 1
-north = 8
+north = 4
 south = 0
 
 # actions of the players
@@ -79,9 +54,9 @@ brake = np.array([0, 0])
 # Probabilities of other vehicles actions (must sum 1)
 # Todo: Check how to find correct values for this.
 
-prob_left = 0.2
-prob_right = 0.2
-prob_remain = 0.5
+prob_left = 0.15
+prob_right = 0.15
+prob_remain = 0.6
 prob_brake = 0.1
 
 
@@ -89,10 +64,10 @@ prob_brake = 0.1
 action_space = [left, right, remain, brake]
 
 # time steps
-max_time = 5
+max_time = 1
 
 # Number of players
-nr_vehicles = 3  # egovehicle + 3 other cars
+nr_vehicles = 5  # egovehicle + 3 other cars
 
 
 # the space for the state nodes below, Froot and F
@@ -105,6 +80,7 @@ possible_states = [np.array([w, x])
 
 print 'Possible states: \n ' + str(possible_states)
 
+training_values = read_training_values(nr_vehicles)
 
 for vehicle_index in range(nr_vehicles):
     print 'Adding sates of vehice : ' + str(vehicle_index)
@@ -122,7 +98,6 @@ for vehicle_index in range(nr_vehicles):
 
 # print 'state space: \n ' + str(state_space)
 
-
 # starting locations
 
 # Ego-vehicle starts at [0, 0]
@@ -130,9 +105,9 @@ starting_poses = np.array([west, south])
 pose_ind = 1
 while pose_ind < nr_vehicles:
     new_pose = np.array([0, 0])
-    new_pose[0] = np.random.randint(east, size=1) + 1
-    new_pose[1] = np.random.randint(south + nr_vehicles, size=1)
-    # print 'new_pose' + str(new_pose)
+    new_pose[0] = np.random.randint(east + 1, size=1)
+    new_pose[1] = np.random.randint(south + 3, size=1)
+    print 'new_pose' + str(new_pose)
 
     if not check_collision(new_pose, starting_poses):
         starting_poses = np.vstack((starting_poses, new_pose))  # axis=0))
@@ -144,7 +119,7 @@ print 'starting_poses : '
 print starting_poses
 
 # observational noise CPT (left, right, stay)
-obsnoiseCPT = np.array([prob_left, prob_right, prob_remain, prob_brake])
+# obsnoiseCPT = np.array([prob_left, prob_right, prob_remain, prob_brake])
 
 
 def adjust_loc(location):
@@ -270,8 +245,13 @@ node_set = set([movement_node])
 for time_step in range(0, max_time):
     # Observational noise, does not have a parent node
     # Create an observational noise for each car : ChanceNode CcarX, no parents
+    if training_values is not None:
+        obsnoiseCPT = training_values[0]
+        par_obs = [movement_node]
+    else:
+        obsnoiseCPT = np.array([prob_left, prob_right, prob_remain, prob_brake])
+        par_obs = []
 
-    par_obs = []
     CPTi = (obsnoiseCPT, par_obs, action_space)
     chance_nodes = []
     for index_node in range(nr_vehicles):
@@ -352,8 +332,8 @@ def car_reward(F, player):
     reward = position_player[1] * position_player[1]
     if position_player[0] == 0:
         reward -= position_player[1]
-        if position_player[1] > 4:
-            reward = -200
+        if position_player[1] > 2:
+            reward -= 150
 
     f_not_player = None
     for f_b in range(len(F)):
@@ -363,18 +343,12 @@ def car_reward(F, player):
             else:
                 f_not_player = np.vstack((f_not_player, F[f_b]))
     if check_collision(position_player, f_not_player):
-        # print 'Collision'
-        reward = -200
+        # print ' - Collision '
+        reward -= 20
 
-    # if F[0][1] > F[1][1]:
-    #    reward += 10
-
-    # else:
-    #    reward += F[0][1] / 2
-    # reward += F[0][1]
-    sys.stdout.write('\n')
-    sys.stdout.write(' p: ' + str(player_nr) + ' pos : ' + str(position_player[0]) +
-                     ' - ' + str(position_player[1]) + ' r: ' + str(reward))
+    # sys.stdout.write('\r')
+    # sys.stdout.write(' p: ' + str(player_nr) + ' pos : ' + str(position_player[0]) +
+    #                  ' - ' + str(position_player[1]) + ' r: ' + str(reward))
     return reward
 
 
@@ -394,9 +368,9 @@ G = iterSemiNFG(node_set, reward_funcs)
 
 # making a set of the names of the first two time steps for visualization
 # drawset = set([n.name for n in G.time_partition[0]]).union(set([n.name for n in G.time_partition[1]]))
-# drawset = set([n.name for n in G.time_partition[0]])
+drawset = set([n.name for n in G.time_partition[0]])
 
-# G.draw_graph(drawset)
+G.draw_graph(drawset)
 
 # visualizing the first two time steps of the net
 
@@ -408,8 +382,8 @@ for index_node in range(nr_vehicles):
     # adding the other nodes
     decision_node_name = 'Dcar' + str(index_node)
     print 'Decision node name: ' + decision_node_name
-    # G.bn_part[decision_node_name][0].randomCPT(mixed=True)  # .uniformCPT()
-    G.bn_part[decision_node_name][0].uniformCPT()
+    G.bn_part[decision_node_name][0].randomCPT(mixed=True)  # .uniformCPT()
+    # G.bn_part[decision_node_name][0].uniformCPT()
 
 # pointing all CPTs to time 0 CPT
 cptdict = G.get_decisionCPTs(mode='basename')
@@ -445,54 +419,14 @@ G.set_CPTs(cptdict)
 #####################################################
 
 # Generate the dictionary of inputs
-N = 5
+N = 10
 mcrl_params = mcrl_dict(G, 1, np.linspace(200, 1, N), N, 1, np.linspace(.5, 1, N),
                         np.linspace(.2, 1, N),  L0Dist='uniform', pureout=True)
 
 MCRL_solved = EwmaMcrl(G, mcrl_params)
 MCRL_solved.solve_game(setCPT=True)
 
-for index_node in range(nr_vehicles):
-    # adding the other nodes
-
-    car_name = 'Dcar' + str(index_node)
-    print 'Training: ' + car_name  + 'at level 2'
-    MCRL_solved.train_node(car_name, 2, setCPT=True)
-
-# Show convergence for hider
-
-# MCRL_solved.figs['Dhide']['1'].show()
-
-# We can also train a player to the next level
-
-#
-#MCRL_solved.train_node('Dslow', 2, setCPT=True)
-#MCRL_solved.train_node('Dfast', 3, setCPT=True)
-#
-
-
-#
-#
-# valuedict = G.sample_timesteps(G.starttime, G.endtime, basenames=['F'])
-# print valuedict['F']
-#
-#
-# print 'try'
-# valuedict = G.sample_timesteps(G.starttime, G.endtime, basenames=['F'])
-# print valuedict['F']
-
-
-# # node in G.bn_part['Dfast']:
-# print 'Dfast 0'
-# print G.bn_part['Dfast'][0].CPT
-# print 'Dfast solved 0'
-# print MCRL_solved.Game.bn_part['Dfast'][0].CPT
-# # node in G.bn_part['Dfast']:
-# print 'Dslow 0'
-# print G.bn_part['Dslow'][0].CPT
-# print 'Dslow solved 0'
-# print MCRL_solved.Game.bn_part['Dslow'][0].CPT
-# # plt.show()
+store_training_values(nr_vehicles, MCRL_solved.Game)
 
 print 'try non solved'
 valuedict = G.sample_timesteps(G.starttime, G.endtime, basenames=['F'])
@@ -503,25 +437,3 @@ valuedict = MCRL_solved.Game.sample_timesteps(G.starttime, G.endtime, basenames=
 print valuedict['F']
 
 
-print 'try non solved'
-valuedict = G.sample_timesteps(G.starttime, G.endtime, basenames=['F'])
-print valuedict['F']
-
-print 'try solved'
-valuedict = MCRL_solved.Game.sample_timesteps(G.starttime, G.endtime, basenames=['F'])
-print valuedict['F']
-
-print 'try non solved'
-valuedict = G.sample_timesteps(G.starttime, G.endtime, basenames=['F'])
-print valuedict['F']
-
-print 'try solved'
-valuedict = MCRL_solved.Game.sample_timesteps(G.starttime, G.endtime, basenames=['F'])
-print valuedict['F']
-# print 'try'
-# valuedict = G.sample_timesteps(G.starttime, G.endtime, basenames=['F'])
-# print valuedict['F']
-#
-# print 'try'
-# valuedict = MCRL_solved.Game.sample_timesteps(G.starttime, G.endtime, basenames=['F'])
-# print valuedict['F']

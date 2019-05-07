@@ -130,7 +130,7 @@ class EwmaMcrl(object):
             eps = eps*np.ones(N)
         # getting shorter/more descriptive variable names to work with
         T0 = Game.starttime
-        T = Game.endtime+1
+        T = Game.endtime + 1
         shape = Game.bn_part[bn][0].CPT.shape
         shape_last = shape[-1]
         for dn in Game.bn_part[bn]:  # pointing all CPTs to T0, i.e. single policy
