@@ -30,7 +30,7 @@ from pynfg_ros import DeterNode, ChanceNode, DecisionNode
 from pynfg_ros.levelksolutions.mcrl import *
 from pynfg_ros.pgtsolutions.intelligence.policy import *
 
-from aux_functions import *
+from aux_functions_nb import *
 
 
 ###########################################
@@ -94,53 +94,85 @@ prob_dist_actions = np.array([prob_left,
 # space of actions that players can choose
 action_space = [left, right, accel, remain, brake]
 
-
 training_values = read_training_values(nr_vehicles)
 
 observation_space = get_observation_space()
 
-
 # Starting positions
-# Ego-vehicle starts at west south
-starting_poses = np.array([west, 2.5])
-# new_pose = np.array([east, south])
-# starting_poses = np.vstack((starting_poses, new_pose))  # axis=0))
-pose_ind = 0
-while pose_ind < nr_vehicles-1:
-    new_pose = np.array([1, pose_ind * 2.0])
-    starting_poses = np.vstack((starting_poses, new_pose))  # axis=0))
-    # new_pose = np.array([0, pose_ind * 1.5])
-    # starting_poses = np.vstack((starting_poses, new_pose))  # axis=0))
-    pose_ind += 1
-    # new_pose[0] = np.random.randint(0, high=east + 1, size=1)
-    # new_pose[1] = np.random.randint(0, high=south + int((nr_vehicles + 1)), size=1)
-    print 'new_pose' + str(new_pose)
 
-    # if not check_collision(new_pose, starting_poses):
+# # new_pose = np.array([east, south])
+# # starting_poses = np.vstack((starting_poses, new_pose))  # axis=0))
+# pose_ind = 0
+# while pose_ind < nr_vehicles-1:
+#     new_pose = np.array([1, pose_ind * 1.5])
+#     starting_poses = np.vstack((starting_poses, new_pose))  # axis=0))
+#     # new_pose = np.array([0, pose_ind * 1.5])
+#     # starting_poses = np.vstack((starting_poses, new_pose))  # axis=0))
+#     pose_ind += 1
+#     # new_pose[0] = np.random.randint(0, high=east + 1, size=1)
+#     # new_pose[1] = np.random.randint(0, high=south + int((nr_vehicles + 1)), size=1)
+#     print 'new_pose' + str(new_pose)
+#
+#     # if not check_collision(new_pose, starting_poses):
+#     # pose_ind += 1
+#     print 'Pose index : ' + str(pose_ind)
+#
+# print 'Starting_poses :  \n ' + str(starting_poses)
+#
+# # Ego-vehicle starts at [0, 0]
+# starting_velocities = np.array([0, 0.5])
+# pose_ind = 1
+# while pose_ind < nr_vehicles:
+#     new_vel = np.array([0, 0.5])
+#     print 'new_velocity' + str(new_vel)
+#     starting_velocities = np.vstack((starting_velocities, new_vel))  # axis=0))
+#     pose_ind += 1
+#     # print 'Pose index : ' + str(pose_ind)
+#
+# print 'Starting velocities : \n ' + str(starting_velocities)
+#
+# current_status = [starting_poses, starting_velocities]
 
-        # pose_ind += 1
-    print 'Pose index : ' + str(pose_ind)
 
-print 'Starting_poses :  \n ' + str(starting_poses)
+def get_starting_status():
+    # Starting positions
+    # Ego-vehicle starts at west south
+    # Ego-vehicle starts at west south
+    # print 'get Starting status!'
+    starting_poses = np.array([west, round(np.random.uniform(1.0, 2.9), 2)])
+    pose_ind = 0
+    while pose_ind < nr_vehicles - 1:
+        new_pose = np.array([0.0, 0.0])
+        new_pose[0] = east
+        new_pose[1] = round(np.random.uniform(0.2, 4.5), 2)
+        # np.random.randint(south + 3, size=1)
+        # print 'new_pose 1' + str(new_pose)
+        if not check_collision(new_pose, starting_poses):
+            starting_poses = np.vstack((starting_poses, new_pose))
+            pose_ind += 1
+            # print 'Pose index : ' + str(pose_ind)
+    # print 'Starting_poses :  \n ' + str(starting_poses)
 
-# Ego-vehicle starts at [0, 0]
-starting_velocities = np.array([0, 0.5])
-pose_ind = 1
-while pose_ind < nr_vehicles:
-    new_vel = np.array([0, 0.5])
-    print 'new_velocity' + str(new_vel)
-    starting_velocities = np.vstack((starting_velocities, new_vel))  # axis=0))
-    pose_ind += 1
-    # print 'Pose index : ' + str(pose_ind)
+    # Ego-vehicle starts at [0, 0]
+    starting_velocities = np.array([0, 0.5])
+    pose_ind = 1
 
-print 'Starting velocities : \n ' + str(starting_velocities)
+    while pose_ind < nr_vehicles:
+        new_vel = np.array([0, 0.5])
+        # print 'new_velocity' + str(new_vel)
+        starting_velocities = np.vstack((starting_velocities, new_vel))  # axis=0))
+        pose_ind += 1
+        # print 'Pose index : ' + str(pose_ind)
 
-current_status = [starting_poses, starting_velocities]
+    # print 'Starting velocities : \n ' + str(starting_velocities)
 
-print 'Current status :  \n ' + str(current_status)
+    current_status = [starting_poses, starting_velocities]
+    # print 'Current status :  \n ' + str(current_status)
+
+    return current_status
+
 
 #  print 'All observation space : \n ' + str(observation_space)
-
 
 initial_policy = get_initial_policy(observation_space)
 
@@ -236,7 +268,7 @@ def compute_new_status(**keyword_args):
             car_numbers.append(player_nr)
 
     if previous_status is None:
-        previous_status = copy.deepcopy(current_status)
+        previous_status = get_starting_status()
         # print "No prev status - Return initial pose"
         # print "Current status \n" + str(previous_status)
         return previous_status
@@ -248,8 +280,8 @@ def compute_new_status(**keyword_args):
         # print "Car nr %s" % movement_index
         # print "Prev pos %s - prev vel %s " % (previous_status[0][movement_index],
         #                                       previous_status[1][movement_index])
-
-        if len(car_movements) is 0:
+        car_move = remain
+        if len(car_movements) is not 0:
             # Remain as default action
             car_move = remain
         else:
@@ -370,7 +402,6 @@ continuous_t = True
 
 #  movement_node =
 #  DeterNode('Root0', new_localization, params_f, continuous_f, space=state_space, basename='Root', time=0)
-
 movement_node = DeterNode('Root0', compute_new_status, params_f, continuous_t, basename='Root', time=0)
 # Observational noise, does not have a parent node
 # Create an observational noise for each car : ChanceNode CcarX, no parents
@@ -398,11 +429,11 @@ for time_step in range(0, max_time):
             par_obs = [obs_nodes_prev[index_node]]
 
         else:
-            # obsnoiseCPT = prob_dist_actions
-            # par_obs = []
+            obsnoiseCPT = prob_dist_actions
+            par_obs = []
 
-            obsnoiseCPT = initial_policy
-            par_obs = [obs_nodes_prev[index_node]]
+            # obsnoiseCPT = initial_policy
+            # par_obs = [obs_nodes_prev[index_node]]
         CPTi = (obsnoiseCPT, par_obs, action_space)
         node_basename = 'car' + str(index_node)
         node_name = node_basename + str(time_step)
@@ -624,17 +655,17 @@ for index_node in range(nr_vehicles):
     if training_values is not None:
         G.bn_part[decision_node_name][0].CPT = training_values[index_node]
     else:
-        # G.bn_part[decision_node_name][0].randomCPT(mixed=True)
+        G.bn_part[decision_node_name][0].randomCPT(mixed=True)
         # G.bn_part[decision_node_name][0].uniformCPT()
-        G.bn_part[decision_node_name][0].CPT = initial_policy
+        # G.bn_part[decision_node_name][0].CPT = initial_policy
 
 # pointing all CPTs to time 0 CPT
 cptdict = G.get_decisionCPTs(mode='basename')
 G.set_CPTs(cptdict)
 
 # Generate the dictionary of inputs
-N = 500
-mcrl_params = mcrl_dict(G, 2, np.linspace(100, 1, N), N, 1, np.linspace(.5, 1, N),
+N = 1000
+mcrl_params = mcrl_dict(G, 1, np.linspace(1000, 1, N), N, 1, np.linspace(.5, 1, N),
                         np.linspace(.2, 1, N), L0Dist='uniform', pureout=True)
 #
 MCRL_solved = EwmaMcrl(G, mcrl_params)
@@ -642,7 +673,7 @@ MCRL_solved.solve_game(setCPT=True)
 
 
 store_training_values(nr_vehicles, MCRL_solved.Game)
-store_game(MCRL_solved, 'Game_stored_4_level1.pickle')
+store_game(MCRL_solved, 'Game_stored_4_level3.pickle')
 
 
 print 'try non solved'
