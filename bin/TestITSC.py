@@ -27,10 +27,10 @@ GNU Affero General Public License
 from __future__ import division
 
 from pynfg_ros import DeterNode, ChanceNode, DecisionNode
-from pynfg_ros.levelksolutions.mcrl import *
+
 from pynfg_ros.pgtsolutions.intelligence.policy import *
 
-from aux_functionsITSC2 import *
+from aux_functions_nb import *
 
 
 ###########################################
@@ -99,14 +99,13 @@ training_values = read_training_values(nr_vehicles)
 
 observation_space = get_observation_space()
 
-
 # Starting positions
 # Ego-vehicle starts at west south
 starting_poses = np.array([west, 2.5])
 # new_pose = np.array([east, south])
 # starting_poses = np.vstack((starting_poses, new_pose))  # axis=0))
-pose_ind = 1
-while pose_ind < nr_vehicles:
+pose_ind = 0
+while pose_ind < nr_vehicles-1:
     new_pose = np.array([1, pose_ind * 1.5])
     starting_poses = np.vstack((starting_poses, new_pose))  # axis=0))
     # new_pose = np.array([0, pose_ind * 1.5])
@@ -117,8 +116,7 @@ while pose_ind < nr_vehicles:
     print 'new_pose' + str(new_pose)
 
     # if not check_collision(new_pose, starting_poses):
-
-        # pose_ind += 1
+    # pose_ind += 1
     print 'Pose index : ' + str(pose_ind)
 
 print 'Starting_poses :  \n ' + str(starting_poses)
@@ -140,7 +138,6 @@ current_status = [starting_poses, starting_velocities]
 print 'Current status :  \n ' + str(current_status)
 
 #  print 'All observation space : \n ' + str(observation_space)
-
 
 initial_policy = get_initial_policy(observation_space)
 
@@ -370,7 +367,6 @@ continuous_t = True
 
 #  movement_node =
 #  DeterNode('Root0', new_localization, params_f, continuous_f, space=state_space, basename='Root', time=0)
-
 movement_node = DeterNode('Root0', compute_new_status, params_f, continuous_t, basename='Root', time=0)
 # Observational noise, does not have a parent node
 # Create an observational noise for each car : ChanceNode CcarX, no parents
@@ -401,7 +397,7 @@ for time_step in range(0, max_time):
             obsnoiseCPT = prob_dist_actions
             par_obs = []
 
-            # obsnoiseCPT = initial_policy
+            #obsnoiseCPT = initial_policy
             #par_obs = [obs_nodes_prev[index_node]]
         CPTi = (obsnoiseCPT, par_obs, action_space)
         node_basename = 'car' + str(index_node)
@@ -461,96 +457,10 @@ for time_step in range(0, max_time):
     # adding new set of nodes from time step t to nodeset
     node_set.update([movement_node])
 
+
 ##########################
 # REWARD FUNCTIONS
 ##########################
-
-
-# def get_reward(F, player, decision):
-#     """
-#     seeker's reward function
-#     :param F: Node with status of all players
-#     :param player: player number
-#     :param decision: decision taken by player
-#     :return:
-#     """
-#
-#     player_nr = int(player[3:])
-#     # print 'Player Number : ' + str(player_nr)
-#
-#     # reward = 0
-#     # F = None
-#
-#     # print '\n Decision : ' + str(decision) + '\n'
-#
-#     position_player = F[0][player_nr]
-#     # print 'Position player \n' + str(position_player)
-#     velocity_player = F[1][player_nr]
-#     # print 'Velocity player \n' + str(velocity_player)
-#
-#     reward = 0  # position_player[1]  # * position_player[1]  # position_player[1]
-#     # reward += velocity_player[1] * 2
-#
-#     if np.array_equal(decision, hard_brake) is True:
-#         reward -= 10
-#     if np.array_equal(decision, hard_accel) is True:
-#         reward -= 10
-#
-#     if position_player[0] == west:
-#         if np.array_equal(decision, right) is True:
-#             reward -= 150
-#         # if np.array_equal(decision, left) is True:
-#         #     reward += 10
-#         if position_player[1] == north - blocked_north:
-#             if np.array_equal(decision, remain) is True:
-#                 reward -= 150
-#         # else:
-#         #     pos_blocked = north - blocked_north
-#         #     pos_blocked_n = position_player[1] / pos_blocked
-#         #     reward -= 10 * pos_blocked_n
-#         # if position_player[1] == north - blocked_north:
-#         #     if np.array_equal(decision, remain) is True:
-#         #         reward -= 150
-#
-#     if position_player[0] == east:
-#         if position_player[1] > north - blocked_north + 2:
-#             reward += position_player[1] * 5  # position_player[1]  # position_player[1]
-#         if np.array_equal(decision, left) is True:
-#             reward -= 150
-#
-#     # print '\n F \n' + str(F)
-#
-#     f_not_player = None
-#     for f_b in range(len(F)):
-#         # print 'Item  : ' + str(f_b)
-#         if not f_b == player_nr:
-#             if f_not_player is None:
-#                 f_not_player = F[0][f_b]
-#             else:
-#                 f_not_player = np.vstack((f_not_player, F[0][f_b]))
-#             # print 'Pos Other Players  : \n' + str(f_not_player)
-#     # print position_player
-#     # print np.array([east, north])
-#     # distance_to_front = get_distance(position_player, f_not_player)
-#     # if distance_to_front < 2:
-#     #     reward -= distance_to_front*10
-#     if np.array_equal(position_player, np.array([east, north])) is False:
-#         if check_collision(position_player, f_not_player):
-#             # print 'Collision!'
-#             reward -= 350
-#
-#     #
-#     # sys.stdout.write('\n')
-#     # sys.stdout.write('  pla : ' + str(player_nr) +
-#     #                  '  pos : ' + str(position_player) +
-#     #                  '  vel : ' + str(velocity_player) +
-#     #                  '  Dec : ' + str(decision) +
-#     #                  '  Rew : ' + str(reward))
-#     # sys.stdout.write('\n')
-#     # print 'Reward ' + str(reward)
-#
-#     return reward
-
 
 def get_reward(F, player, decision):
     """
@@ -575,7 +485,7 @@ def get_reward(F, player, decision):
 
     if position_player[0] == east:
         if position_player[1] > north - blocked_north - 1.5:
-            reward += position_player[1]  # position_player[1]  # position_player[1]
+            reward += 5*position_player[1]  # position_player[1]  # position_player[1]
         if np.array_equal(decision, left) is True:
             reward = -350
 
@@ -690,24 +600,28 @@ for index_node in range(nr_vehicles):
 ##################################
 G = iterSemiNFG(node_set, reward_funcs)
 
+
+##################################
+# CREATING THE iterSemiNFG
+##################################
+G = iterSemiNFG(node_set, reward_funcs)
+
 # visualizing the first two time steps of the net
 
 ###########################################
 # MANIPULATING CPTs
 ###########################################
-
-Game = read_game('Game_stored_4.pickle')
+Game = read_game('Game_stored_4_level1.pickle')
 
 # Giving nodes a uniform CPT
 for index_node in range(nr_vehicles):
     # adding the other nodes
     decision_node_name = 'Dcar' + str(index_node)
     print 'Decision node name: ' + decision_node_name
-    #G.bn_part[decision_node_name][0].randomCPT(mixed=True)
-    #G.bn_part[decision_node_name][0].uniformCPT()
-    G.bn_part[decision_node_name][0].CPT = Game.bn_part[decision_node_name][0].CPT
+    # G.bn_part[decision_node_name][0].randomCPT(mixed=True)
+    # G.bn_part[decision_node_name][0].uniformCPT()
+    G.bn_part[decision_node_name][0].CPT = Game.Game.bn_part[decision_node_name][0].CPT
     # print G.bn_part[decision_node_name][0].CPT
-
 
 # pointing all CPTs to time 0 CPT
 cptdict = G.get_decisionCPTs(mode='basename')
