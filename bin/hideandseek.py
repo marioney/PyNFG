@@ -316,7 +316,7 @@ def captures(G):
     """
     defining a welfare metric on G
     :param G: Game to evaluate
-    :return: Aveage number of captures
+    :return: Average number of captures
     """
     T0 = G.starttime
     T = G.endtime

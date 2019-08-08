@@ -17,7 +17,6 @@ import copy
 from pynfg_ros.classes.seminfg import SemiNFG
 
 
-
 def mceu(Game, dn, N, tol=30, delta=1, verbose=False):
     """Compute the move-conditioned expected utilities for all parent values
 

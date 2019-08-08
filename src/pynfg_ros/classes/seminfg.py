@@ -460,7 +460,6 @@ class SemiNFG(object):
         else:
             outdict = self.get_values()
 
-
     def draw_graph(self, subgraph=None):
         """Draw the DAG representing the topology of the SemiNFG.
 
@@ -488,8 +487,8 @@ class SemiNFG(object):
                 G.add_edge(n.name,child.name)
 #        pos = nx.spring_layout(G, iterations=100)
 #        fig = nx.draw_networkx(G, pos)
-        #fig = nx.draw(G, pos=graphviz_layout(G), node_size=1600, cmap=plt.cm.Blues,
-         #             node_color=range(len(G)), prog='dot')
+#        #fig = nx.draw(G, pos=graphviz_layout(G), node_size=1600, cmap=plt.cm.Blues,
+#         #             node_color=range(len(G)), prog='dot')
 #        fig = nx.draw_graphviz(G, prog='dot')
         fig = nx.draw(G, pos=graphviz_layout(G), node_size=1600, cmap=plt.cm.Blues,
                       node_color=range(len(G)), prog='dot')

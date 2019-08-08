@@ -194,10 +194,10 @@ class iterSemiNFG(SemiNFG):
            The decision nodes must have CPTs before using this function.
 
         """
-        if stop==None or stop>self.endtime:
+        if stop is None or stop > self.endtime:
             stop = self.endtime
         if basenames:
-#            import pdb; pdb.set_trace()
+            #  import pdb; pdb.set_trace()
             outdict = dict(zip(basenames, [[] for x in range(len(basenames))]))
             for t in range(start, stop+1):
                 for n in self.time_partition[t]:
